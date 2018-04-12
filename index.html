@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Mon éditeur WYSIWYG</title>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	</head>
+	<body>
+		<div class="ligne">
+			<div class="colonne">
+				<div class="ligne">
+					<input type="button" value="G" style="font-weight:bold;" onclick="exec('bold');"/>
+				    <input type="button" value="I" style="font-style:italic;" onclick="exec('italic');" />
+				    <input type="button" value="S" style="text-decoration:underline;" onclick="exec('underline');" />
+					<select class="" name="">
+						<option value="">Paragraphe</option>
+						<option value="h1">Titre 1</option>
+						<option value="h2">Titre 2</option>
+						<option value="h3">Titre 3</option>
+						<option value="h4">Titre 4</option>
+						<option value="h5">Titre 5</option>
+						<option value="h6">Titre 6</option>
+					</select>
+				</div>
+			    <div id="editor" onkeyup="updateCode();" onkeydown="updateCode();" onclick="updateCode();" onscroll="syncScrollWtih('code');" contentEditable>
+					<p>Ecrivez quelque chose d'inspirant !</p>
+				</div>
+			</div>
+			<div class="colonne">
+				<div id="code" onscroll="syncScrollWtih('editor');"></div>
+			</div>
+		</div>
+
+	<script type="text/javascript">
+		String.prototype.escapeHTML = function () {
+			return(
+				this.replace(/>/g,'&gt;').
+				replace(/</g,'&lt;').
+				replace(/"/g,'&quot;')
+			);
+		};
+		function updateCode(){
+			getSelectionHtml();
+			document.getElementById("code").innerHTML = document.getElementById("editor").innerHTML.escapeHTML();
+		}
+
+		function exec(nom, argument){
+		    if (typeof argument === 'undefined') {
+		        argument = '';
+		    }
+		    document.execCommand(nom, false, argument);
+			updateCode();
+		}
+
+		function syncScrollWtih(div) {
+		    document.getElementById(div).scrollTop = event.target.scrollTop;
+		}
+	</script>
+	<script type="text/javascript">
+		function getSelectionHtml() {
+			var sel, range, node;
+			if (window.getSelection) {
+				sel = window.getSelection();
+				if (sel.getRangeAt && sel.rangeCount) {
+					range = window.getSelection().getRangeAt(0);
+					var html = '<b>' + range + '</b>'
+					range.deleteContents();
+
+					var el = document.createElement("div");
+					el.innerHTML = html;
+					var frag = document.createDocumentFragment(), node, lastNode;
+					while ( (node = el.firstChild) ) {
+						lastNode = frag.appendChild(node);
+					}
+					range.insertNode(frag);
+				}
+			} else if (document.selection && document.selection.createRange) {
+				range = document.selection.createRange();
+				range.collapse(false);
+				range.pasteHTML(html);
+			}
+		}
+	</script>
+	</body>
+</html>
+
+<style media="screen">
+	#editor{
+		width: 500px;
+		height: 200px;
+		border: 1px solid black;
+		padding: 5px;
+		overflow: auto;
+		word-wrap: break-word;
+	}
+
+	#code {
+		width: 500px;
+		height: 200px;
+		overflow : auto;
+		word-wrap: break-word;
+	}
+</style>
